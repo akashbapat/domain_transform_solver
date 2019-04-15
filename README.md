@@ -11,6 +11,5 @@ If you use this project for your research, please cite:
       title={The Domain Transform Solver},
       author={Bapat, Akash and Frahm, Jan-Michael},
       booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
-      year={2019}
-}
-
+      year={2019},
+    }
