@@ -1,0 +1,3 @@
+[submodule "ext/cudaArray"]
+	path = ext/cudaArray
+	url = https://github.com/akashbapat/cudaArray.git
