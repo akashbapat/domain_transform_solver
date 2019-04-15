@@ -28,15 +28,15 @@ endfunction() # TEST_IT
 #
 #
 #
-#
+###########################################################
 add_custom_target(copy_testdata_dir ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${CMAKE_CURRENT_SOURCE_DIR}/testdata
 		${CMAKE_CURRENT_BINARY_DIR}/testdata
                  )
 ###########################################################
-#add_executable(brdf_problem_test brdf_problem_test.cpp)
-#target_link_libraries(brdf_problem_test brdf_problem)
-#TEST_IT(brdf_problem_test)
+add_executable(error_types_test error_types_test.cpp)
+target_link_libraries(error_types_test error_types)
+TEST_IT(error_types_test)
 ###########################################################
 
