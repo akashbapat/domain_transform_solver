@@ -1,3 +1,6 @@
 [submodule "ext/cudaArray"]
 	path = ext/cudaArray
 	url = https://github.com/akashbapat/cudaArray.git
+[submodule "ext/cub"]
+	path = ext/cub
+	url = https://github.com/akashbapat/cub.git
