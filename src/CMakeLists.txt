@@ -9,5 +9,7 @@ if(BUILD_WITH_CUDA)
   # Add definitions for error types if using cuda.
   target_compile_definitions(error_types PUBLIC USE_CUDA)
   target_link_libraries(error_types ${CUDA_LIBRARIES})
+
+  cuda_add_library(hfbs hfbs.h hfbs.cu)
 #
 endif(BUILD_WITH_CUDA)
