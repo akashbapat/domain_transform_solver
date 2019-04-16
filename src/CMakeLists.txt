@@ -11,5 +11,8 @@ if(BUILD_WITH_CUDA)
   target_link_libraries(error_types ${CUDA_LIBRARIES})
 
   cuda_add_library(hfbs hfbs.h hfbs.cu)
+
+  cuda_add_library(domain_transform_filter domain_transform_filter.h domain_transform_filter.cu)
+  target_link_libraries(domain_transform_filter cub error_types)
 #
 endif(BUILD_WITH_CUDA)

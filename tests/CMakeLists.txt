@@ -39,4 +39,9 @@ add_executable(error_types_test error_types_test.cpp)
 target_link_libraries(error_types_test error_types)
 TEST_IT(error_types_test)
 ###########################################################
+add_executable(domain_transform_filter_test domain_transform_filter_test.cpp)
+target_link_libraries(domain_transform_filter_test domain_transform_filter ${OPENCV_LIBRARIES})
+add_dependencies(domain_transform_filter_test copy_testdata_dir)
+TEST_IT(domain_transform_filter_test)
+###########################################################
 
