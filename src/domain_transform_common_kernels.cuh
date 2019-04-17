@@ -33,6 +33,34 @@ __global__ void CopyVariableTranspose(const ImageDim image_dim, SRC_TYPE src,
   }
 }
 
+template <typename SRC_TYPE, typename DST_TYPE>
+__global__ void CopyVariableFlagGreaterThanThresh(const ImageDim image_dim,
+                                                  const float threshold,
+                                                  SRC_TYPE flag, SRC_TYPE src,
+                                                  DST_TYPE dst) {
+  const int x = blockIdx.x * blockDim.x + threadIdx.x;
+  const int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+  if (x >= 0 && y >= 0 && x < image_dim.width && y < image_dim.height) {
+    const typename SRC_TYPE::Scalar flag_val = flag.get(x, y);
+    if (flag_val > threshold) {
+      dst.set(x, y, src.get(x, y));
+    }
+  }
+}
+
+template <typename SRC_TYPE, typename DST_TYPE>
+__global__ void SquareVariable(const ImageDim image_dim, SRC_TYPE src,
+                               DST_TYPE dst) {
+  const int x = blockIdx.x * blockDim.x + threadIdx.x;
+  const int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+  if (x >= 0 && y >= 0 && x < image_dim.width && y < image_dim.height) {
+    const typename SRC_TYPE::Scalar val = src.get(x, y);
+    dst.set(x, y, val * val);
+  }
+}
+
 __device__ __forceinline__ float Uchar4SumOfAbsDiffNormalize(uchar4 v1,
                                                              uchar4 v2) {
   return (fabsf(v1.x - v2.x) + fabsf(v1.y - v2.y) + fabsf(v1.z - v2.z) +

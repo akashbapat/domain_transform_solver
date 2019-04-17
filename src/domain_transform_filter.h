@@ -43,7 +43,7 @@ class DomainTransformFilter {
 
   // Downloads the internal filter state, useful for debugging.  No checks are
   // done to ensure the size at pointer image is correct.
-  void Download(const ImageType& image_type, void* image) const;
+virtual  void Download(const ImageType& image_type, void* image) const;
 
   // Clears all buffers to zero.
   void ClearAll();

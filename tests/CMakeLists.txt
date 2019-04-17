@@ -44,4 +44,9 @@ target_link_libraries(domain_transform_filter_test domain_transform_filter ${OPE
 add_dependencies(domain_transform_filter_test copy_testdata_dir)
 TEST_IT(domain_transform_filter_test)
 ###########################################################
+add_executable(domain_transform_solver_test domain_transform_solver_test.cpp)
+target_link_libraries(domain_transform_solver_test domain_transform_solver ${OPENCV_LIBRARIES})
+add_dependencies(domain_transform_solver_test copy_testdata_dir)
+TEST_IT(domain_transform_solver_test)
+###########################################################
 
