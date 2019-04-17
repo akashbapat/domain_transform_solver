@@ -11,11 +11,12 @@ if(BUILD_WITH_CUDA)
   target_link_libraries(error_types ${CUDA_LIBRARIES})
 
   cuda_add_library(hfbs hfbs.h hfbs.cu)
+  target_link_libraries(hfbs cuda_array error_types)
 
   cuda_add_library(domain_transform_filter domain_transform_filter.h domain_transform_filter.cu)
-  target_link_libraries(domain_transform_filter cub error_types)
+  target_link_libraries(domain_transform_filter cuda_array cub error_types)
 
   cuda_add_library(domain_transform_solver domain_transform_solver.h domain_transform_solver.cu)
-  target_link_libraries(domain_transform_solver domain_transform_filter)
+  target_link_libraries(domain_transform_solver domain_transform_filter cuda_array)
 #
 endif(BUILD_WITH_CUDA)
