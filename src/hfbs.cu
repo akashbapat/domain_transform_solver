@@ -506,7 +506,7 @@ void HFBS::InitFrame(const COLOR_SPACE &color_space, void *color_image) {
       dim3 block_dim, grid_dim;
       ComputeBlockAndGridDim2D<false>(image_dim_, &block_dim, &grid_dim);
 
-      RGB2YCbCr<<<grid_dim, block_dim>>>(solver_impl_->color_image);
+      RGB2YCbCr<<<grid_dim, block_dim>>>(image_dim_, solver_impl_->color_image);
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }
@@ -514,7 +514,7 @@ void HFBS::InitFrame(const COLOR_SPACE &color_space, void *color_image) {
       dim3 block_dim, grid_dim;
       ComputeBlockAndGridDim2D<false>(image_dim_, &block_dim, &grid_dim);
 
-      RGB2YYY<<<grid_dim, block_dim>>>(solver_impl_->color_image);
+      RGB2YYY<<<grid_dim, block_dim>>>(image_dim_, solver_impl_->color_image);
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }
