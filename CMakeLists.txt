@@ -35,9 +35,6 @@ endif()
 # Useful for testing, turn off if not using test code.
 find_package(GTest REQUIRED)
 
-find_package(Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIR})
-
 find_package(OpenCV REQUIRED)
 set(OPENCV_LIBRARIES opencv_core opencv_imgproc opencv_imgcodecs opencv_highgui opencv_calib3d)
 
@@ -56,7 +53,7 @@ if(BUILD_WITH_CUDA)
 
   set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -std=c++11 -O3 --expt-extended-lambda --expt-relaxed-constexpr -Wno-deprecated-gpu-targets)
   
-  # These include_directories are here due to a bug in cmake for including INTTERFACE libraries for cuda.
+  # These include_directories are here due to a bug in cmake for including INTERFACE libraries for cuda.
   include_directories(ext/cudaArray/cudaArray)
   include_directories(ext/cub/cub)
 endif(BUILD_WITH_CUDA)
