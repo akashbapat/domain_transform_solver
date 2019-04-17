@@ -82,7 +82,7 @@ class DomainTransformSolverTest : public ::testing::Test {
   }
 };
 
-TEST_F(DomainTransformSolverTest, ComputeCostVolumeWorks) {
+TEST_F(DomainTransformSolverTest, SolverWorks) {
   const std::string left_image_path =
       domain_transform_solver_test_path_prefix + "testdata/reference.png";
   const cv::Mat left_color_image = ReadRGBAImageFrom(left_image_path);
@@ -107,10 +107,12 @@ TEST_F(DomainTransformSolverTest, ComputeCostVolumeWorks) {
                                     reinterpret_cast<float*>(target.data),
                                     reinterpret_cast<float*>(confidence.data));
 
-  DomainFilterParamsVec<1> confidence_filter_params = GetConfParams();
-  constexpr int kLeftSideClearWidth = 100;
-  domain_transform_solver.ComputeConfidence(confidence_filter_params,
-                                            kLeftSideClearWidth);
+  // Use this instead of passing confidence.data to InitFrame if no confidence
+  // is available.
+  //  DomainFilterParamsVec<1> confidence_filter_params = GetConfParams();
+  //  constexpr int kLeftSideClearWidth = 100;
+  //  domain_transform_solver.ComputeConfidence(confidence_filter_params,
+  //                                            kLeftSideClearWidth);
 
   domain_transform_solver.ComputeColorSpaceDifferential(
       GetDomainFilterParams());
