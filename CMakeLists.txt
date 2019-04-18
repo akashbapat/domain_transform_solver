@@ -6,7 +6,6 @@ set (CMAKE_CXX_STANDARD 11)
 
 option(BUILD_SHARED_LIBS "Build dynamic library" ON)
 
-
 option(BUILD_WITH_CUDA "Build with CUDA" ON)
 
 if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
@@ -14,7 +13,12 @@ if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
 message("Setting the build to Debug")
 endif()
 
+# This option builds CLIs(command-line interfaces) which are helpful to run 
+# local or small programs.
+option(BUILD_CLI "Build CLIs" ON)
 
+# Useful for testing, turn off if not using test code.
+option(BUILD_TESTING "Build tests" ON)
 ################################################################################
 # Include CMake dependencies
 ################################################################################
@@ -32,16 +36,18 @@ endif()
 # Find packages
 ################################################################################
 
-# Useful for testing, turn off if not using test code.
-find_package(GTest REQUIRED)
+if(BUILD_TESTING)
+  find_package(GTest REQUIRED)
+endif(BUILD_TESTING)
 
 find_package(OpenCV REQUIRED)
 set(OPENCV_LIBRARIES opencv_core opencv_imgproc opencv_imgcodecs opencv_highgui opencv_calib3d)
 
+if(BUILD_CLI)
 # Useful for passing commandline arguments to program.
-find_package(gflags REQUIRED)
-include_directories(${GFLAGS_INCLUDE_DIR})
-
+  find_package(gflags REQUIRED)
+  include_directories(${GFLAGS_INCLUDE_DIR})
+endif(BUILD_CLI)
 
 if(BUILD_WITH_CUDA)
 
@@ -77,4 +83,7 @@ endif()
 add_subdirectory(ext)
 add_subdirectory(src)
 include_directories(src)
+
+if(BUILD_TESTING)
 add_subdirectory(tests)
+endif(BUILD_TESTING)
