@@ -6,6 +6,7 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 
+#include "domain_transform_image_io.h"
 #include "error_types.h"
 
 namespace {
@@ -17,31 +18,7 @@ bool domain_transform_filter_test_visualize_results = false;
 
 namespace domain_transform {
 
-class DomainTransformFilterTest : public ::testing::Test {
- protected:
-  cv::Mat ReadRGBAImageFrom(const std::string& full_name) {
-    cv::Mat color_image = cv::imread(full_name, CV_LOAD_IMAGE_COLOR);
-    cv::Mat rgba_image;
-    cv::cvtColor(color_image, rgba_image, CV_BGR2RGBA);
-    return rgba_image;
-  }
-
-  cv::Mat ReadFloatImageFromUchar(const std::string& full_name,
-                                  const float scale) {
-    cv::Mat gray_image = cv::imread(full_name, CV_LOAD_IMAGE_GRAYSCALE);
-    cv::Mat float_image;
-    gray_image.convertTo(float_image, CV_32FC1, scale);
-    return float_image;
-  }
-
-  void ImageStatistics(const cv::Mat& image, const std::string& image_name) {
-    double max_val, min_val;
-    cv::minMaxLoc(image, &min_val, &max_val);
-    std::cerr << image_name << " " << min_val << " " << max_val << std::endl;
-  }
-};
-
-TEST_F(DomainTransformFilterTest, FilterWorks) {
+TEST(DomainTransformFilterTest, FilterWorks) {
   const std::string left_image_path =
       domain_transform_filter_test_path_prefix + "testdata/reference.png";
   const cv::Mat left_color_image = ReadRGBAImageFrom(left_image_path);
@@ -67,7 +44,7 @@ TEST_F(DomainTransformFilterTest, FilterWorks) {
   const cv::Mat target = ReadFloatImageFromUchar(
       domain_transform_filter_test_path_prefix + "testdata/target.png",
       kDisparityScale);
-  ImageStatistics(target, "target");
+  ImageStatistics("target", target);
 
   domain_transform_filter.InitFrame(COLOR_SPACE::YCbCr, left_color_image.data);
 
@@ -86,7 +63,7 @@ TEST_F(DomainTransformFilterTest, FilterWorks) {
     domain_transform_filter.Download(ImageType::DIFFERENTIAL,
                                      differential_image.data);
 
-    ImageStatistics(differential_image, "differential_image");
+    ImageStatistics("differential_image", differential_image);
     cv::imshow("differential_image", differential_image);
 
     cv::Mat integral_image = cv::Mat(
@@ -94,7 +71,7 @@ TEST_F(DomainTransformFilterTest, FilterWorks) {
 
     domain_transform_filter.Download(ImageType::INTEGRAL, integral_image.data);
 
-    ImageStatistics(integral_image, "integral_image");
+    ImageStatistics("integral_image", integral_image);
     cv::imshow("integral_image", integral_image / 255);
 
     cv::Mat optim_disparity_image_norm;
@@ -103,8 +80,8 @@ TEST_F(DomainTransformFilterTest, FilterWorks) {
 
     cv::imshow("filtered_image", optim_disparity_image_norm * 255.0f);
     cv::Mat optim_dis_show_image = optim_disparity_image_norm * 255.0f;
-    ImageStatistics(optim_disparity_image_norm, "optim_disparity_image_norm");
-    ImageStatistics(optim_dis_show_image, "optim_dis_show_image");
+    ImageStatistics("optim_disparity_image_norm", optim_disparity_image_norm);
+    ImageStatistics("optim_dis_show_image", optim_dis_show_image);
     std::cerr << "Mean of the image is " << cv::mean(optim_dis_show_image)
               << std::endl;
     cv::waitKey(0);

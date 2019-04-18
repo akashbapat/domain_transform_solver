@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "domain_transform_image_io.h"
 #include "error_types.h"
 
 namespace {
@@ -21,37 +22,6 @@ namespace domain_transform {
 
 class DomainTransformSolverTest : public ::testing::Test {
  protected:
-  void SaveImage(const cv::Mat& image, const std::string& image_name,
-                 const std::string& dir_name) {
-    if (domain_transform_stereo_update_out_files) {
-      cv::imwrite(domain_transform_solver_test_path_prefix + dir_name + "out_" +
-                      image_name + ".png",
-                  image);
-    }
-  }
-
-  cv::Mat ReadRGBAImageFrom(const std::string& full_name) {
-    cv::Mat color_image = cv::imread(full_name, CV_LOAD_IMAGE_COLOR);
-    cv::Mat rgba_image;
-    cv::cvtColor(color_image, rgba_image, CV_BGR2RGBA);
-    return rgba_image;
-  }
-
-  cv::Mat ReadFloatImageFromUchar(const std::string& full_name,
-                                  const float scale) {
-    cv::Mat gray_image = cv::imread(full_name, CV_LOAD_IMAGE_GRAYSCALE);
-    cv::Mat float_image;
-    gray_image.convertTo(float_image, CV_32FC1, scale);
-    return float_image;
-  }
-
-  void ImageStatistics(const cv::Mat& image, const std::string& image_name) {
-    double max_val, min_val;
-    cv::minMaxLoc(image, &min_val, &max_val);
-    std::cerr << image_name << " min:" << min_val << " max:" << max_val
-              << std::endl;
-  }
-
   DomainFilterParams GetDomainFilterParams() {
     DomainFilterParams domain_filter_params;
     domain_filter_params.sigma_x = 8;
@@ -96,12 +66,12 @@ TEST_F(DomainTransformSolverTest, SolverWorks) {
   const cv::Mat confidence = ReadFloatImageFromUchar(
       domain_transform_solver_test_path_prefix + "testdata/confidence.png",
       1 / 255.0f);
-  ImageStatistics(confidence, "confidence");
+  ImageStatistics("confidence", confidence);
   constexpr float kDisparityScale = 1;
   const cv::Mat target = ReadFloatImageFromUchar(
       domain_transform_solver_test_path_prefix + "testdata/target.png",
       kDisparityScale);
-  ImageStatistics(target, "target");
+  ImageStatistics("target", target);
 
   domain_transform_solver.InitFrame(COLOR_SPACE::YCbCr, left_color_image.data,
                                     reinterpret_cast<float*>(target.data),
@@ -126,7 +96,7 @@ TEST_F(DomainTransformSolverTest, SolverWorks) {
     domain_transform_solver.Download(ImageType::CONFIDENCE,
                                      confidence_image_computed.data);
 
-    ImageStatistics(confidence_image_computed, "confidence_image_computed");
+    ImageStatistics("confidence_image_computed", confidence_image_computed);
     cv::imshow("confidence_image_computed", confidence_image_computed);
 
     cv::Mat color_image_test =
@@ -136,7 +106,7 @@ TEST_F(DomainTransformSolverTest, SolverWorks) {
     domain_transform_solver.Download(ImageType::COLOR_IMAGE,
                                      color_image_test.data);
 
-    ImageStatistics(color_image_test, "color_image_test");
+    ImageStatistics("color_image_test", color_image_test);
 
     cv::Mat differential_image = cv::Mat(
         left_color_image.rows, left_color_image.cols, CV_32FC1, cv::Scalar(0));
@@ -144,7 +114,7 @@ TEST_F(DomainTransformSolverTest, SolverWorks) {
     domain_transform_solver.Download(ImageType::DIFFERENTIAL,
                                      differential_image.data);
 
-    ImageStatistics(differential_image, "differential_image");
+    ImageStatistics("differential_image", differential_image);
     //  cv::imshow("differential_image", differential_image);
 
     cv::Mat integral_image = cv::Mat(
@@ -152,7 +122,7 @@ TEST_F(DomainTransformSolverTest, SolverWorks) {
 
     domain_transform_solver.Download(ImageType::INTEGRAL, integral_image.data);
 
-    ImageStatistics(integral_image, "integral_image");
+    ImageStatistics("integral_image", integral_image);
 
     cv::Mat optim_disparity_image_with_nan = cv::Mat(
         left_color_image.rows, left_color_image.cols, CV_32FC1, cv::Scalar(0));
@@ -160,8 +130,8 @@ TEST_F(DomainTransformSolverTest, SolverWorks) {
     domain_transform_solver.Download(ImageType::OPTIMIZED_QUANTITY,
                                      optim_disparity_image_with_nan.data);
 
-    ImageStatistics(optim_disparity_image_with_nan,
-                    "optim_disparity_image_with_nan");
+    ImageStatistics("optim_disparity_image_with_nan",
+                    optim_disparity_image_with_nan);
 
     cv::Mat mask = (optim_disparity_image_with_nan > 0) &
                    (optim_disparity_image_with_nan < 1000);
@@ -170,9 +140,10 @@ TEST_F(DomainTransformSolverTest, SolverWorks) {
 
     optim_disparity_image_with_nan.copyTo(optim_disparity_image, mask);
 
-    ImageStatistics(optim_disparity_image, "optim_disparity_image");
+    ImageStatistics("optim_disparity_image", optim_disparity_image);
 
-    SaveImage(optim_disparity_image / kDisparityScale, "solved", "testdata/");
+    SaveImage(optim_disparity_image / kDisparityScale, "out_solved",
+              "testdata/");
     cv::Mat optim_disparity_image_norm;
     cv::normalize(optim_disparity_image, optim_disparity_image_norm);
     cv::imshow("solved", optim_disparity_image_norm * 255);
