@@ -2,6 +2,7 @@
 #define DOMAIN_TRANSFORM_SOLVER_STRUCT_H_
 
 #include "cudaArray2D.h"
+#include "error_types.h"
 
 namespace domain_transform {
 // DomainTransformSolverStruct holds the cuda memory buffers which are used to
@@ -24,7 +25,10 @@ struct DomainTransformSolverStruct {
       : confidence(max_width, max_height),
         confidence_square(max_width, max_height),
         confidence_square_buffer(max_width, max_height),
-        target(max_width, max_height) {}
+        target(max_width, max_height) {
+    // Check for successful allocation of memory.
+    GPU_CHECK(cudaPeekAtLastError());
+  }
 };
 
 }  // namespace domain_transform

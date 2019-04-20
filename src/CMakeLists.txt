@@ -19,4 +19,15 @@ if(BUILD_WITH_CUDA)
   cuda_add_library(domain_transform_solver domain_transform_solver.h domain_transform_solver.cu)
   target_link_libraries(domain_transform_solver domain_transform_filter cuda_array)
 #
+#
+#
+  if(BUILD_CLI)
+  #
+    add_executable(benchmark_depth_super_res_cli benchmark_depth_super_res_cli.cpp)
+    target_link_libraries(benchmark_depth_super_res_cli gflags domain_transform_solver ${OPENCV_LIBRARIES} hfbs)
+  #
+  endif(BUILD_CLI)
+#
+#
+#
 endif(BUILD_WITH_CUDA)

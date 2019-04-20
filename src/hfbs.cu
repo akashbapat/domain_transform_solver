@@ -485,7 +485,10 @@ struct HFBS::HFBSImpl {
         scratch_space(max_grid_x, max_grid_y, max_grid_l),
         splat_norm(max_grid_x, max_grid_y, max_grid_l),
         inv_diag_A(max_grid_x, max_grid_y, max_grid_l),
-        splat_c(max_grid_x, max_grid_y, max_grid_l) {}
+        splat_c(max_grid_x, max_grid_y, max_grid_l) {
+    // Check for successful allocation of memory.
+    GPU_CHECK(cudaPeekAtLastError());
+  }
 };
 
 void HFBS::SetFilterParams(const HFBSGridParams &grid_params) {

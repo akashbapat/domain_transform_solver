@@ -3,6 +3,7 @@
 
 #include "cudaArray2D.h"
 #include "cudaSurface2D.h"
+#include "error_types.h"
 
 namespace domain_transform {
 
@@ -59,7 +60,10 @@ struct DomainTransformFilterStruct {
         summed_area_y(max_height, max_width),
         var(max_width, max_height),
         var_buffer(max_width, max_height),
-        parallel_scan_transpose(max_height, max_width) {}
+        parallel_scan_transpose(max_height, max_width) {
+    // Check for successful allocation of memory.
+    GPU_CHECK(cudaPeekAtLastError());
+  }
 };
 
 }  // namespace domain_transform
