@@ -16,6 +16,7 @@ struct DtsOptions {
   DomainFilterParamsVec<1> conf_params;
   COLOR_SPACE color_space;
   ImageDim image_dims;
+  float overwrite_target_above_conf = -1;
 };
 
 // HfbsOptions assembles the options typically useful for HFBS at a single
@@ -24,6 +25,7 @@ struct HfbsOptions {
   HFBSGridParams grid_params;
   domain_transform::COLOR_SPACE color_space;
   ImageDim image_dims;
+  float overwrite_target_above_conf = -1;
 };
 
 // Template function signature which is specialized for each edge-aware solver.
@@ -37,7 +39,8 @@ void Solve(const DtsOptions& solver_options,
   solver->ComputeColorSpaceDifferential(solver_options.filter_options);
   solver->IntegrateColorDifferentials();
 
-  solver->Optimize(solver_options.optim_options);
+  solver->Optimize(solver_options.optim_options,
+                   solver_options.overwrite_target_above_conf);
 }
 
 // Template specialization HFBS to solve the problem given the options.

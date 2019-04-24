@@ -124,9 +124,9 @@ void DomainTransformSolver::Optimize(
         CopyVariableFlagGreaterThanThresh<<<grid_dim, block_dim>>>(
             image_dims_, overwrite_target_above_conf,
             solver_struct_->confidence, solver_struct_->target, var);
-      } else {
-        IntegrateVariable(image_dims_, var, &filter_struct_->summed_area_x);
       }
+      IntegrateVariable(image_dims_, var, &filter_struct_->summed_area_x);
+
       switch (optimize_params.loss) {
         case RobustLoss::CHARBONNIER: {
           OptimizeX<RobustLoss::CHARBONNIER, false><<<grid_dim, block_dim>>>(
@@ -158,10 +158,10 @@ void DomainTransformSolver::Optimize(
         CopyVariableFlagGreaterThanThresh<<<grid_dim, block_dim>>>(
             image_dims_, overwrite_target_above_conf,
             solver_struct_->confidence, solver_struct_->target, var);
-      } else {
-        IntegrateVariable(image_dims_, var, &filter_struct_->summed_area_y,
-                          &filter_struct_->parallel_scan_transpose);
       }
+      IntegrateVariable(image_dims_, var, &filter_struct_->summed_area_y,
+                        &filter_struct_->parallel_scan_transpose);
+
       dim3 block_dim_t, grid_dim_t;
       ComputeBlockAndGridDim2D<true>(image_dims_, &block_dim_t, &grid_dim_t);
 

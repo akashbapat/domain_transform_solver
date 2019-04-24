@@ -25,6 +25,9 @@ if(BUILD_WITH_CUDA)
   #
     add_executable(benchmark_depth_super_res_cli benchmark_depth_super_res_cli.cpp)
     target_link_libraries(benchmark_depth_super_res_cli gflags domain_transform_solver ${OPENCV_LIBRARIES} hfbs)
+
+    add_executable(benchmark_colorization_cli benchmark_colorization_cli.cpp)
+    target_link_libraries(benchmark_colorization_cli gflags domain_transform_solver ${OPENCV_LIBRARIES} hfbs)
   #
   endif(BUILD_CLI)
 #
