@@ -86,7 +86,8 @@ void DomainTransformSolver::Download(const ImageType &image_type,
 
 void DomainTransformSolver::ComputeColorSpaceDifferential(
     const DomainFilterParams &domain_filter_params) {
-  DomainTransformFilter::ComputeColorSpaceDifferential(domain_filter_params);
+  filter_params_ = domain_filter_params;
+  DomainTransformFilter::ComputeColorSpaceDifferential(filter_params_);
 }
 
 DomainTransformSolver::DomainTransformSolver(const ImageDim &max_image_dims)
@@ -129,21 +130,21 @@ void DomainTransformSolver::Optimize(
 
       switch (optimize_params.loss) {
         case RobustLoss::CHARBONNIER: {
-          OptimizeX<RobustLoss::CHARBONNIER, false><<<grid_dim, block_dim>>>(
+          OptimizeX<RobustLoss::CHARBONNIER><<<grid_dim, block_dim>>>(
               image_dims_, var, solver_struct_->target,
               solver_struct_->confidence, filter_struct_->ct_H, sigma,
-              filter_struct_->summed_area_x, optimize_params.lambda,
-              filtered_var);
+              optimize_params.step_size, filter_struct_->summed_area_x,
+              optimize_params.lambda, filtered_var);
 
           GPU_CHECK(cudaPeekAtLastError());
           break;
         }
         case RobustLoss::L2: {
-          OptimizeX<RobustLoss::L2, false><<<grid_dim, block_dim, false>>>(
+          OptimizeX<RobustLoss::L2><<<grid_dim, block_dim>>>(
               image_dims_, var, solver_struct_->target,
               solver_struct_->confidence, filter_struct_->ct_H, sigma,
-              filter_struct_->summed_area_x, optimize_params.lambda,
-              filtered_var);
+              optimize_params.step_size, filter_struct_->summed_area_x,
+              optimize_params.lambda, filtered_var);
           GPU_CHECK(cudaPeekAtLastError());
           break;
         }
@@ -170,8 +171,8 @@ void DomainTransformSolver::Optimize(
           OptimizeY<RobustLoss::CHARBONNIER><<<grid_dim_t, block_dim_t>>>(
               image_dims_, var, solver_struct_->target,
               solver_struct_->confidence, filter_struct_->ct_V, sigma,
-              filter_struct_->summed_area_y, optimize_params.lambda,
-              filtered_var);
+              optimize_params.step_size, filter_struct_->summed_area_y,
+              optimize_params.lambda, filtered_var);
           GPU_CHECK(cudaPeekAtLastError());
           break;
         }
@@ -179,8 +180,8 @@ void DomainTransformSolver::Optimize(
           OptimizeY<RobustLoss::L2><<<grid_dim_t, block_dim_t>>>(
               image_dims_, var, solver_struct_->target,
               solver_struct_->confidence, filter_struct_->ct_V, sigma,
-              filter_struct_->summed_area_y, optimize_params.lambda,
-              filtered_var);
+              optimize_params.step_size, filter_struct_->summed_area_y,
+              optimize_params.lambda, filtered_var);
           GPU_CHECK(cudaPeekAtLastError());
           break;
         }
@@ -191,8 +192,6 @@ void DomainTransformSolver::Optimize(
       tmp = filtered_var;
       filtered_var = var;
       var = tmp;
-
-      GPU_CHECK(cudaPeekAtLastError());
     }
   }
 

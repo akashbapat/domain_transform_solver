@@ -199,7 +199,7 @@ class ColorizationDataset {
     std::string image_name;
   };
 
-  // There are twelve images in the dataset, change this if you add more.
+  // There are 2 images in the dataset, change this if you add more.
   static constexpr int kNumImages = 2;
 
   explicit ColorizationDataset(const std::string& path_to_data_top_dir)

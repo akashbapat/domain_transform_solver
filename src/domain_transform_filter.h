@@ -28,7 +28,7 @@ class DomainTransformFilter {
   ~DomainTransformFilter();
 
   // Sets the dimension of the image to be filtered.
-  void SetImageDim(const ImageDim& image_dim);
+  virtual void SetImageDim(const ImageDim& image_dim);
 
   // Initializes the 4 channel uchar color image. If convert_to_color_space is
   // not RGB, the input color domain is assumed to be RGB and is used to convert
@@ -43,10 +43,20 @@ class DomainTransformFilter {
 
   // Downloads the internal filter state, useful for debugging.  No checks are
   // done to ensure the size at pointer image is correct.
-virtual  void Download(const ImageType& image_type, void* image) const;
+  virtual void Download(const ImageType& image_type, void* image) const;
 
   // Clears all buffers to zero.
   void ClearAll();
+
+  // Do not use these if only using the filter.
+  // Computes dHdx and dVdy.
+  void ComputeColorSpaceDifferential(
+      const DomainFilterParams& domain_filter_params);
+
+  // Integrates dHdx and dVdy in parallel to obtain the domain transform values.
+  void IntegrateColorDifferentials();
+
+  DomainTransformFilterStruct* FilterStructPtr();
 
  protected:
   std::unique_ptr<DomainTransformFilterStruct> filter_struct_;
@@ -57,13 +67,6 @@ virtual  void Download(const ImageType& image_type, void* image) const;
   void Filter(const DomainFilterParams& filter_params, const int num_iter,
               const cua::CudaArray2D<float>* input,
               cua::CudaArray2D<float>* output);
-
-  // Computes dHdx and dVdy.
-  void ComputeColorSpaceDifferential(
-      const DomainFilterParams& domain_filter_params);
-
-  // Integrates dHdx and dVdy in parallel to obtain the domain transform values.
-  void IntegrateColorDifferentials();
 };
 
 }  // namespace domain_transform

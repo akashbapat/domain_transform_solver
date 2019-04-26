@@ -1,7 +1,6 @@
 #ifndef DOMAIN_TRANSFORM_SOLVER_CUH_
 #define DOMAIN_TRANSFORM_SOLVER_CUH_
 
-
 #include "cudaSurface2D.h"
 
 #include "domain_transform_filter.cuh"
@@ -35,11 +34,12 @@ struct EmptyLoss {
   }
 };
 
-template <RobustLoss loss_type, bool update_monitor_flag,
-          typename CudaArrayType, typename LossTerm = EmptyLoss<float> >
+template <RobustLoss loss_type, typename CudaArrayType,
+          typename LossTerm = EmptyLoss<float> >
 __global__ void OptimizeX(const ImageDim image_dim, CudaArrayType const_var,
                           CudaArrayType target, CudaArrayType confidence,
                           CudaArrayType ct_dir, const float sigma_z,
+                          const float step_size,
                           const CudaArrayType intergrated_const_var,
                           const float lambda, CudaArrayType var,
                           LossTerm loss_term = LossTerm()) {
@@ -78,9 +78,9 @@ __global__ void OptimizeX(const ImageDim image_dim, CudaArrayType const_var,
 
     const float var_val =
         const_var.get(x, y) +
-        Step(lambda,
-             GaussianLossGradient(0.5, const_var.get(x, y), bilateral_grad),
-             grad_target);
+        step_size * Step(lambda, GaussianLossGradient(0.5, const_var.get(x, y),
+                                                      bilateral_grad),
+                         grad_target);
     var.set(x, y, var_val);
   }
 }
@@ -89,6 +89,7 @@ template <RobustLoss loss_type, typename CudaArrayType>
 __global__ void OptimizeY(const ImageDim image_dim, CudaArrayType const_var,
                           CudaArrayType target, CudaArrayType confidence,
                           CudaArrayType ct_dir, const float sigma_z,
+                          const float step_size,
                           const CudaArrayType intergrated_const_var,
                           const float lambda, CudaArrayType var) {
   const int y = blockIdx.x * blockDim.x + threadIdx.x;
@@ -107,8 +108,9 @@ __global__ void OptimizeY(const ImageDim image_dim, CudaArrayType const_var,
 
     const float var_val =
         const_var.get(x, y) +
-        Step(lambda,
-             GaussianLossGradient(0.5, const_var.get(x, y), bilateral_grad), 0);
+        step_size * Step(lambda, GaussianLossGradient(0.5, const_var.get(x, y),
+                                                      bilateral_grad),
+                         0);
     var.set(x, y, var_val);
   }
 }

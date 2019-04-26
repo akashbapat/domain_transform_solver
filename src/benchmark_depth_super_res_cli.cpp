@@ -159,10 +159,9 @@ void BenchmarkDepthSuperResolution(const std::string& path_to_data_top_dir,
 
       problem_solver.PostProcessResult(&optim_disparity_image);
 
-      const double rms_error =
-          benchmark::RMSError(image_data.gt, optim_disparity_image);
-
-      bres.AddTrial(im_idx, rms_error, local_time_in_ms,
+      bres.AddTrial(im_idx,
+                    benchmark::RMSError(image_data.gt, optim_disparity_image),
+                    local_time_in_ms,
                     optim_disparity_image.rows * optim_disparity_image.cols);
 
       dataset.SaveResultForAlogrithm(algorithm_name, optim_disparity_image);

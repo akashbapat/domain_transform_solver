@@ -22,6 +22,7 @@ class DomainTransformSolverStruct;
 //  // Load the images.
 //  cv::Mat confidence, target, color_image;
 //
+//  domain_transform_solver.SetImageDim(image_dim);
 //  domain_transform_solver.InitFrame(COLOR_SPACE::YCbCr, left_color_image.data,
 //                                    reinterpret_cast<float*>(target.data),
 //                                    reinterpret_cast<float*>(confidence.data));
@@ -78,6 +79,9 @@ class DomainTransformSolver : public DomainTransformFilter {
 
  protected:
   std::unique_ptr<DomainTransformSolverStruct> solver_struct_;
+
+  // Stored here as it is useful for stereo processing.
+  DomainFilterParams filter_params_;
 };
 
 }  // namespace domain_transform

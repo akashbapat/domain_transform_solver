@@ -30,22 +30,27 @@ struct HfbsOptions {
 
 // Template function signature which is specialized for each edge-aware solver.
 template <typename SolverOptions, typename SolverType>
-void Solve(const SolverOptions& solver_options, SolverType* solver);
+void Solve(const SolverOptions& solver_options, const bool compute_confidence,
+           SolverType* solver);
 
 // Template specialization DTS to solve the problem given the options.
 template <>
-void Solve(const DtsOptions& solver_options,
+void Solve(const DtsOptions& solver_options, const bool compute_confidence,
            domain_transform::DomainTransformSolver* solver) {
   solver->ComputeColorSpaceDifferential(solver_options.filter_options);
   solver->IntegrateColorDifferentials();
 
+  if (compute_confidence) {
+    solver->ComputeConfidence(solver_options.conf_params, 0);
+  }
   solver->Optimize(solver_options.optim_options,
                    solver_options.overwrite_target_above_conf);
 }
 
 // Template specialization HFBS to solve the problem given the options.
 template <>
-void Solve(const HfbsOptions& solver_options, HFBS* solver) {
+void Solve(const HfbsOptions& solver_options, const bool compute_confidence,
+           HFBS* solver) {
   solver->Optimize();
 }
 
@@ -70,7 +75,7 @@ float EdgeAwareOptimize(const cv::Mat& rgba_image, const cv::Mat& target_image,
   GPU_CHECK(cudaEventCreate(&stop));
   GPU_CHECK(cudaEventRecord(start, 0));
 
-  Solve(solver_options, solver);
+  Solve(solver_options, confidence.data == nullptr, solver);
 
   // Stop logging time.
   GPU_CHECK(cudaEventRecord(stop, 0));

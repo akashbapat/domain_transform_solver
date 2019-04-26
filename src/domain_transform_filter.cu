@@ -30,7 +30,8 @@ void DomainTransformFilter::InitFrame(const COLOR_SPACE &color_space,
       dim3 block_dim, grid_dim;
       ComputeBlockAndGridDim2D<false>(image_dims_, &block_dim, &grid_dim);
 
-      RGB2YCbCr<<<grid_dim, block_dim>>>(image_dims_, filter_struct_->color_image);
+      RGB2YCbCr<<<grid_dim, block_dim>>>(image_dims_,
+                                         filter_struct_->color_image);
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }
@@ -38,7 +39,8 @@ void DomainTransformFilter::InitFrame(const COLOR_SPACE &color_space,
       dim3 block_dim, grid_dim;
       ComputeBlockAndGridDim2D<false>(image_dims_, &block_dim, &grid_dim);
 
-      RGB2YYY<<<grid_dim, block_dim>>>(image_dims_, filter_struct_->color_image);
+      RGB2YYY<<<grid_dim, block_dim>>>(image_dims_,
+                                       filter_struct_->color_image);
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }
@@ -208,6 +210,10 @@ void DomainTransformFilter::ClearAll() {
   filter_struct_->var_buffer.Fill(0.0f);
 
   filter_struct_->parallel_scan_transpose.Fill(0.0f);
+}
+
+DomainTransformFilterStruct *DomainTransformFilter::FilterStructPtr() {
+  return filter_struct_.get();
 }
 
 }  // namespace domain_transform
