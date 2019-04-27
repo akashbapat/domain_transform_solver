@@ -39,8 +39,8 @@ __global__ void Fill3dAndPad(const HFBSGridParams grid_params,
   const int z = blockIdx.z * blockDim.z + threadIdx.z;
 
   if (x >= 0 && y >= 0 && z >= 0 && x <= grid_params.grid_x &&
-      y <= grid_params.grid_y && z <= grid_params.grid_l &&
-      x < dst.get_width() && y < dst.get_height() && z < dst.get_depth()) {
+      y <= grid_params.grid_y && z <= grid_params.grid_l && x < dst.Width() &&
+      y < dst.Height() && z < dst.Depth()) {
     dst.set(x, y, z, value);
   }
 }
@@ -497,8 +497,8 @@ void HFBS::SetFilterParams(const HFBSGridParams &grid_params) {
 
 void HFBS::InitFrame(const COLOR_SPACE &color_space, void *color_image) {
   // Copy inputs to GPU.
-  solver_impl_->color_image.Upload(image_dim_.width, image_dim_.height,
-                                   reinterpret_cast<uchar4 *>(color_image));
+  solver_impl_->color_image.View(0, 0, image_dim_.width, image_dim_.height) =
+      reinterpret_cast<uchar4 *>(color_image);
   GPU_CHECK(cudaPeekAtLastError());
 
   switch (color_space) {
@@ -526,8 +526,8 @@ void HFBS::InitFrame(const COLOR_SPACE &color_space, void *color_image) {
 
 void HFBS::SetImageDim(const ImageDim &image_dim) {
   // Protect against larger image than whats provided in constructor.
-  if (solver_impl_->color_image.get_height() < image_dim.height ||
-      solver_impl_->color_image.get_width() < image_dim.width) {
+  if (solver_impl_->color_image.Height() < image_dim.height ||
+      solver_impl_->color_image.Width() < image_dim.width) {
     std::cerr
         << "Image size is more than the reserved Cuda memory in constructor."
         << std::endl;
@@ -541,13 +541,13 @@ void HFBS::InitFrame(const COLOR_SPACE &color_space, void *color_image,
                      float *target, float *confidence) {
   HFBS::InitFrame(color_space, color_image);
 
-  solver_impl_->target.Upload(image_dim_.width, image_dim_.height, target);
+  solver_impl_->target.View(0, 0, image_dim_.width, image_dim_.height) = target;
   GPU_CHECK(cudaPeekAtLastError());
   if (confidence == nullptr) {
     solver_impl_->confidence.Fill(1.0f);
   } else {
-    solver_impl_->confidence.Upload(image_dim_.width, image_dim_.height,
-                                    confidence);
+    solver_impl_->confidence.View(0, 0, image_dim_.width, image_dim_.height) =
+        confidence;
     GPU_CHECK(cudaPeekAtLastError());
   }
 }
@@ -555,19 +555,20 @@ void HFBS::InitFrame(const COLOR_SPACE &color_space, void *color_image,
 void HFBS::Download(const ImageType &image_type, float *image) const {
   switch (image_type) {
     case ImageType::TARGET: {
-      solver_impl_->target.CopyTo(image_dim_.width, image_dim_.height, image);
+      solver_impl_->target.View(0, 0, image_dim_.width, image_dim_.height)
+          .CopyTo(image);
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }
     case ImageType::CONFIDENCE: {
-      solver_impl_->confidence.CopyTo(image_dim_.width, image_dim_.height,
-                                      image);
+      solver_impl_->confidence.View(0, 0, image_dim_.width, image_dim_.height)
+          .CopyTo(image);
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }
     case ImageType::OPTIMIZED_QUANTITY: {
-      solver_impl_->optim_var.CopyTo(image_dim_.width, image_dim_.height,
-                                     image);
+      solver_impl_->optim_var.View(0, 0, image_dim_.width, image_dim_.height)
+          .CopyTo(image);
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }
@@ -590,9 +591,9 @@ void HFBS::Optimize() {
   grid_params_.grid_l = std::ceil(255.0 / grid_params_.sigma_l);
 
   // Protect against large 3D bilateral space.
-  if (grid_params_.grid_x > solver_impl_->h.get_width() ||
-      grid_params_.grid_y > solver_impl_->h.get_height() ||
-      grid_params_.grid_l > solver_impl_->h.get_depth()) {
+  if (grid_params_.grid_x > solver_impl_->h.Width() ||
+      grid_params_.grid_y > solver_impl_->h.Height() ||
+      grid_params_.grid_l > solver_impl_->h.Depth()) {
     std::cerr << "Trying to use too large a bilateral space. Increase the blur "
                  "sigmas or allocate more memory via constructor."
               << std::endl;

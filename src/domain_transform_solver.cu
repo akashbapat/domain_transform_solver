@@ -48,13 +48,14 @@ void DomainTransformSolver::InitFrame(const COLOR_SPACE &color_space,
                                       float *confidence) {
   DomainTransformFilter::InitFrame(color_space, color_image);
 
-  solver_struct_->target.Upload(image_dims_.width, image_dims_.height, target);
+  solver_struct_->target.View(0, 0, image_dims_.width, image_dims_.height) =
+      target;
   GPU_CHECK(cudaPeekAtLastError());
   if (confidence == nullptr) {
     solver_struct_->confidence.Fill(1.0f);
   } else {
-    solver_struct_->confidence.Upload(image_dims_.width, image_dims_.height,
-                                      confidence);
+    solver_struct_->confidence.View(0, 0, image_dims_.width,
+                                    image_dims_.height) = confidence;
     GPU_CHECK(cudaPeekAtLastError());
   }
 }
@@ -63,20 +64,21 @@ void DomainTransformSolver::Download(const ImageType &image_type,
                                      void *image) const {
   switch (image_type) {
     case ImageType::TARGET: {
-      solver_struct_->target.CopyTo(image_dims_.width, image_dims_.height,
-                                    reinterpret_cast<float *>(image));
+      solver_struct_->target.View(0, 0, image_dims_.width, image_dims_.height)
+          .CopyTo(reinterpret_cast<float *>(image));
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }
     case ImageType::CONFIDENCE: {
-      solver_struct_->confidence.CopyTo(image_dims_.width, image_dims_.height,
-                                        reinterpret_cast<float *>(image));
+      solver_struct_->confidence
+          .View(0, 0, image_dims_.width, image_dims_.height)
+          .CopyTo(reinterpret_cast<float *>(image));
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }
     case ImageType::OPTIMIZED_QUANTITY: {
-      filter_struct_->var.CopyTo(image_dims_.width, image_dims_.height,
-                                 reinterpret_cast<float *>(image));
+      filter_struct_->var.View(0, 0, image_dims_.width, image_dims_.height)
+          .CopyTo(reinterpret_cast<float *>(image));
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }

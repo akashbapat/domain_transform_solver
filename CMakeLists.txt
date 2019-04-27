@@ -60,7 +60,7 @@ if(BUILD_WITH_CUDA)
   set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -std=c++11 -O3 --expt-extended-lambda --expt-relaxed-constexpr -Wno-deprecated-gpu-targets)
   
   # These include_directories are here due to a bug in cmake for including INTERFACE libraries for cuda.
-  include_directories(ext/cudaArray/cudaArray)
+  include_directories(ext/cudaArray/libcua)
   include_directories(ext/cub/cub)
 endif(BUILD_WITH_CUDA)
 ################################################################################

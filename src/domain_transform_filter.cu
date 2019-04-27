@@ -18,8 +18,9 @@ namespace domain_transform {
 void DomainTransformFilter::InitFrame(const COLOR_SPACE &color_space,
                                       void *color_image) {
   // Copy inputs to GPU.
-  filter_struct_->color_image.Upload(image_dims_.width, image_dims_.height,
-                                     reinterpret_cast<uchar4 *>(color_image));
+  filter_struct_->color_image.View(0, 0, image_dims_.width,
+                                   image_dims_.height) =
+      reinterpret_cast<uchar4 *>(color_image);
   GPU_CHECK(cudaPeekAtLastError());
 
   switch (color_space) {
@@ -51,20 +52,21 @@ void DomainTransformFilter::Download(const ImageType &image_type,
                                      void *image) const {
   switch (image_type) {
     case ImageType::COLOR_IMAGE: {
-      filter_struct_->color_image.CopyTo(image_dims_.width, image_dims_.height,
-                                         reinterpret_cast<uchar4 *>(image));
+      filter_struct_->color_image
+          .View(0, 0, image_dims_.width, image_dims_.height)
+          .CopyTo(reinterpret_cast<uchar4 *>(image));
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }
     case ImageType::DIFFERENTIAL: {
-      filter_struct_->dHdx.CopyTo(image_dims_.width, image_dims_.height,
-                                  reinterpret_cast<float *>(image));
+      filter_struct_->dHdx.View(0, 0, image_dims_.width, image_dims_.height)
+          .CopyTo(reinterpret_cast<float *>(image));
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }
     case ImageType::INTEGRAL: {
-      filter_struct_->ct_H.CopyTo(image_dims_.width, image_dims_.height,
-                                  reinterpret_cast<float *>(image));
+      filter_struct_->ct_H.View(0, 0, image_dims_.width, image_dims_.height)
+          .CopyTo(reinterpret_cast<float *>(image));
       GPU_CHECK(cudaPeekAtLastError());
       break;
     }
@@ -191,7 +193,8 @@ void DomainTransformFilter::Filter(const DomainFilterParams &filter_params,
   filter_struct_->var = input;
   Filter(filter_params, num_iter, &filter_struct_->var, &filter_struct_->var);
 
-  filter_struct_->var.CopyTo(image_dims_.width, image_dims_.height, output);
+  filter_struct_->var.View(0, 0, image_dims_.width, image_dims_.height)
+      .CopyTo(output);
 
   GPU_CHECK(cudaPeekAtLastError());
 }

@@ -61,9 +61,10 @@ __global__ void SegmentedScanParallel2DHorizontal(
     for (int block_offset = 0; block_offset < image_dim.width;
          block_offset += BLOCK_THREADS * ITEMS_PER_THREAD) {
       // Compute begin/end offsets of our block's row
-      const int row_in_offset = y * differential.get_pitch() / sizeof(float);
+      const int row_in_offset = y * differential.Pitch() / sizeof(float);
 
-      float* d_in = block_offset + row_in_offset + differential.get_raw_ptr();
+      float* d_in =
+          block_offset + row_in_offset + const_cast<float*>(differential.ptr());
       // Load items into a blocked arrangement.
 
       const int valid_items =
@@ -82,9 +83,9 @@ __global__ void SegmentedScanParallel2DHorizontal(
       // Barrier for smem reuse.
       __syncthreads();
 
-      const int row_out_offset = y * integral.get_pitch() / sizeof(float);
+      const int row_out_offset = y * integral.Pitch() / sizeof(float);
 
-      float* d_out = block_offset + row_out_offset + integral.get_raw_ptr();
+      float* d_out = block_offset + row_out_offset + integral.ptr();
 
       // Store items from a blocked arrangement.
       BlockStoreT(temp_storage.store).Store(d_out, data, valid_items);
