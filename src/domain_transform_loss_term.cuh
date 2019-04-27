@@ -16,9 +16,10 @@ struct PhotometricL2LossTerm {
   cua::CudaSurface2D<uchar4> left_image;
   cua::CudaSurface2D<uchar4> right_image;
   cua::CudaArray2D<float> gradient;
-  // Does not work due to a bug introduec in cudaarray. DO not use.
+
   __device__ float operator()(const int x, const int y, const float d) {
-    if (center_offset + x - d >= 0) {
+    if (center_offset + x - d >= 0 &&
+        center_offset + x - d < gradient.Width()) {
       const typename cua::CudaSurface2D<uchar4>::Scalar val1 =
           left_image.get(x, y);
       const typename cua::CudaSurface2D<uchar4>::Scalar val2 =

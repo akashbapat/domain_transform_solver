@@ -80,32 +80,12 @@ void DomainTransformStereo::Optimize(
       const float grad_alpha = sigma_x_div_sigma_r * sigma_x_div_sigma_r;
       const float grad_beta = -1;
 
-      std::cerr << " ccenter_offset_ " << center_offset_ << ", grad_alpha "
-                << grad_alpha << ", grad_beta " << grad_beta
-                << ", optimize_params.photo_consis_lambda "
-                << optimize_params.photo_consis_lambda << std::endl
-                << std::endl;
-
-#if 1
-
       PhotometricL2LossTerm loss_term(
           center_offset_, optimize_params.photo_consis_lambda,
           filter_struct_->color_image,
           right_filter_->FilterStructPtr()->color_image,
           right_filter_->FilterStructPtr()->dHdx, grad_alpha, grad_beta);
 
-      printf("lambda %f, grad_alpha %f, grad_beta %f, center_offset %f \n\n",
-             loss_term.lambda, loss_term.grad_alpha, loss_term.grad_beta,
-             loss_term.center_offset);
-#else
-      PhotometricL2LossTermTest loss_term(center_offset_,
-                                          optimize_params.photo_consis_lambda,
-                                          grad_alpha, grad_beta);
-
-      printf("lambda %f, grad_alpha %f, grad_beta %f, center_offset %f \n\n",
-             loss_term.lambda, loss_term.grad_alpha, loss_term.grad_beta,
-             loss_term.center_offset);
-#endif
       switch (optimize_params.loss) {
         case RobustLoss::CHARBONNIER: {
           OptimizeX<RobustLoss::CHARBONNIER><<<grid_dim, block_dim>>>(

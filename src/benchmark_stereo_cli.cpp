@@ -284,7 +284,6 @@ float EdgeAwareStereo(const cv::Mat& rgba_left_image,
   GPU_CHECK(cudaEventCreate(&stop));
   GPU_CHECK(cudaEventRecord(start, 0));
 
-  solver->ProcessRightFrame();
   // Number of pixels from the left for which we want to clear the confidence.
   constexpr int kLeftSideClearWidth = 20;
   solver->ComputeConfidence(solver_options.conf_params, kLeftSideClearWidth);
@@ -292,6 +291,7 @@ float EdgeAwareStereo(const cv::Mat& rgba_left_image,
   solver->ComputeColorSpaceDifferential(solver_options.filter_options);
   solver->IntegrateColorDifferentials();
 
+  solver->ProcessRightFrame();
   solver->Optimize(solver_options.optim_options,
                    solver_options.overwrite_target_above_conf);
 
