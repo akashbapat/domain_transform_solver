@@ -14,13 +14,15 @@ If you use this project for your research, please cite:
 ### Compilation
 You need the following dependencies to run the code.
 
-1. Cuda 8 or 9 
+1. Cuda 8 or 9. Does not work with Cuda 10. 
 2. OpenCV
     - Mainly used for image IO or in the *cli.cpp, not used in the main optimization code.
 3. GFlags
     - Only needed to process the commandline flags. The code is organized in such a way to simply remove the flags at the top of each *_cli.cpp with your favorite cmd flag processor. One of the favorites is Boost.
 4. GTest (optional)
     - Turn off tests if GTest is not available. Not so important for using DTS.
+5. LibCua (https://github.com/trueprice/libcua)
+    - Automatically downloaded.
 
 #### Installing dependencies 
 I assume a familiarity with cmake and CMakeLists. The code was tested with CMake 3.5.1
